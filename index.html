@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Influence Manager</title>
+<style>
+#login-screen{position:fixed;inset:0;background:#f8f9fa;display:flex;align-items:center;justify-content:center;z-index:9999}
+#login-screen.hidden{display:none}
+.login-box{background:#fff;border:0.5px solid #dee2e6;border-radius:16px;padding:36px 32px;width:100%;max-width:360px;text-align:center}
+.login-logo{font-size:22px;font-weight:600;color:#1a1a2e;margin-bottom:6px}
+.login-sub{font-size:13px;color:#6c757d;margin-bottom:28px}
+.login-box input{font-size:14px;padding:10px 14px;border:0.5px solid #ced4da;border-radius:8px;width:100%;text-align:center;letter-spacing:.1em}
+.login-box input:focus{outline:none;border-color:#4361ee;box-shadow:0 0 0 2px rgba(67,97,238,.15)}
+.login-error{font-size:12px;color:#e24b4a;margin-top:8px;min-height:18px}
+.login-btn{margin-top:14px;width:100%;padding:10px;background:#1a1a2e;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer}
+.login-btn:hover{background:#333}
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.14.0/dist/tabler-icons.min.css"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:13px;color:#1a1a2e;background:#f8f9fa}
+:root{--bg:#ffffff;--bg2:#f8f9fa;--bg3:#f1f3f5;--border:#dee2e6;--border2:#ced4da;--text:#1a1a2e;--text2:#6c757d;--text3:#adb5bd;--accent:#4361ee;--green:#1d9e75;--green-bg:#eaf3de;--green-text:#27500a;--red:#e24b4a;--red-bg:#fcebeb;--red-text:#791f1f;--amber-bg:#faeeda;--amber-text:#633806;--blue-bg:#e6f1fb;--blue-text:#0c447c;--purple-bg:#eeedfe;--purple-text:#534ab7;--radius:8px;--radius-lg:12px}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+input,select,textarea{font-family:inherit;font-size:13px;padding:6px 10px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);width:100%;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(67,97,238,.15)}
+button{font-family:inherit;font-size:12px;padding:5px 12px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text2);cursor:pointer;transition:background .12s}
+button:hover{background:var(--bg3)}
+button:active{transform:scale(.98)}
+.btn-primary{background:var(--text);color:#fff;border-color:var(--text)}
+.btn-primary:hover{background:#333}
+.btn-danger{background:var(--red-bg);color:var(--red-text);border-color:#f09595}
+.app{max-width:1100px;margin:0 auto;padding:20px 32px}
+.nav{display:flex;align-items:center;gap:0;margin-bottom:1.5rem;border-bottom:1px solid var(--border);padding-bottom:0}
+.nav-title{font-size:15px;font-weight:600;color:var(--text);margin-right:24px;padding-bottom:12px}
+.nav-btn{font-size:13px;padding:8px 16px 11px;background:transparent;border:none;cursor:pointer;color:var(--text2);border-bottom:2px solid transparent;margin-bottom:-1px}
+.nav-btn.active{color:var(--text);border-bottom-color:var(--text);font-weight:500}
+.nav-btn:hover{color:var(--text)}
+.page{display:none}
+.page.active{display:block}
+.stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:1.25rem}
+.stat{background:var(--bg3);border-radius:var(--radius);padding:12px 14px}
+.stat-val{font-size:20px;font-weight:600;color:var(--text)}
+.stat-lbl{font-size:11px;color:var(--text3);margin-top:2px}
+.toolbar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.filter-btn{font-size:11px;padding:4px 11px;border-radius:99px;border:0.5px solid var(--border2);background:transparent;cursor:pointer;color:var(--text2)}
+.filter-btn.active{background:var(--text);color:#fff;border-color:var(--text)}
+.month-select{font-size:12px;padding:5px 8px;width:auto;min-width:160px}
+.ml-auto{margin-left:auto}
+.search-input{width:160px}
+.alert-banner{background:var(--red-bg);border:0.5px solid #f09595;border-radius:var(--radius);padding:10px 14px;margin-bottom:1rem;display:flex;align-items:flex-start;gap:10px}
+.alert-banner.hidden{display:none}
+.table-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:1rem}
+.table-card.done-card{border-color:#9fe1cb}
+.thead{display:grid;padding:8px 14px;background:var(--bg3);border-bottom:0.5px solid var(--border)}
+.thead span{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em}
+.thead.done-head{background:#e1f5ee}
+.creator-row{border-bottom:0.5px solid var(--border)}
+.creator-row:last-child{border-bottom:none}
+.crow{display:grid;padding:10px 14px;align-items:center;cursor:pointer;transition:background .12s}
+.crow:hover{background:var(--bg3)}
+.crow.done-bg{background:#f0fbf4}
+.crow.done-bg:hover{background:#e1f5ee}
+.chevron{font-size:13px;color:var(--text3);transition:transform .2s;display:flex;align-items:center}
+.chevron.open{transform:rotate(90deg)}
+.avatar{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0}
+.pill{font-size:11px;padding:2px 8px;border-radius:99px;font-weight:500;white-space:nowrap;display:inline-block}
+.pill-fr{background:var(--blue-bg);color:var(--blue-text)}
+.pill-jp{background:var(--amber-bg);color:var(--amber-text)}
+.pill-other{background:var(--bg3);color:var(--text2)}
+.pill-encours{background:var(--blue-bg);color:var(--blue-text)}
+.pill-valide{background:var(--green-bg);color:var(--green-text)}
+.pill-attente{background:var(--bg3);color:var(--text2)}
+.pill-annule{background:var(--red-bg);color:var(--red-text)}
+.pill-repond{background:var(--green-bg);color:var(--green-text)}
+.pill-nrepond{background:var(--bg3);color:var(--text2)}
+.pbar-wrap{display:flex;align-items:center;gap:5px}
+.pbar{height:4px;background:var(--border);border-radius:99px;flex:1;overflow:hidden}
+.pbar-fill{height:100%;border-radius:99px;background:#378add}
+.pbar-fill.full{background:var(--green)}
+.pbar-txt{font-size:11px;color:var(--text3);min-width:36px;text-align:right}
+.chk{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:9px;cursor:pointer;flex-shrink:0}
+.chk.ok{background:var(--green);border-color:var(--green);color:#fff}
+.chk.warn{border-color:var(--red)}
+.videos-panel{display:none;background:var(--bg3);border-top:0.5px solid var(--border)}
+.videos-panel.open{display:block}
+.batch-section{padding:10px 14px 6px 70px}
+.batch-label{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:7px;display:flex;align-items:center;gap:7px}
+.batch-label span{font-weight:400;text-transform:none;letter-spacing:0;color:var(--text2)}
+.video-row{display:grid;grid-template-columns:100px 1fr 110px 100px;gap:10px;align-items:center;padding:6px 10px;background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);margin-bottom:4px}
+.infcode{font-size:11px;font-weight:600;font-family:'Courier New',monospace;color:var(--purple-text);background:var(--purple-bg);padding:2px 7px;border-radius:4px}
+.vname{font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vdate{font-size:11px;color:var(--text3)}
+.vstatus{display:inline-flex;align-items:center;gap:4px;justify-content:flex-end}
+.vstatus-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.done-divider{display:flex;align-items:center;gap:10px;margin:1.5rem 0 10px}
+.done-divider-line{flex:1;height:0.5px;background:#9fe1cb}
+.done-divider-lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#0f6e56;display:flex;align-items:center;gap:6px}
+.done-count{background:#e1f5ee;color:#0f6e56;font-size:11px;border-radius:99px;padding:1px 8px}
+.no-results{text-align:center;padding:2rem;font-size:13px;color:var(--text3)}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;align-items:flex-start;justify-content:center;padding-top:60px}
+.modal-bg.open{display:flex}
+.modal{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:20px;width:100%;max-width:480px;max-height:80vh;overflow-y:auto}
+.modal-title{font-size:15px;font-weight:600;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+.form-row{margin-bottom:12px}
+.form-label{font-size:12px;color:var(--text2);margin-bottom:4px;display:block}
+.form-row textarea{height:60px;resize:vertical}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;padding-top:14px;border-top:0.5px solid var(--border)}
+.contacts-grid{display:grid;grid-template-columns:1fr 50px 180px 110px 120px}
+.bilan-box{background:var(--bg3);border-radius:var(--radius-lg);padding:16px;margin-bottom:1rem}
+.bilan-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
+.bilan-stat{background:var(--bg);border-radius:var(--radius);padding:10px 12px;border:0.5px solid var(--border)}
+.bilan-val{font-size:18px;font-weight:600;color:var(--text)}
+.bilan-lbl{font-size:11px;color:var(--text3);margin-top:2px}
+.edit-btn{font-size:11px;padding:2px 8px;color:var(--text3);background:transparent;border:0.5px solid var(--border);border-radius:var(--radius);cursor:pointer}
+.edit-btn:hover{background:var(--bg3)}
+@media(max-width:700px){.stats-row{grid-template-columns:repeat(2,1fr)}.bilan-grid{grid-template-columns:repeat(2,1fr)}}
+
+#login-screen{position:fixed;inset:0;background:#f8f9fa;display:flex;align-items:center;justify-content:center;z-index:9999}
+#login-screen.hidden{display:none}
+.login-box{background:#fff;border:0.5px solid #dee2e6;border-radius:16px;padding:40px 32px;width:100%;max-width:360px;text-align:center}
+.login-logo{font-size:22px;font-weight:700;color:#1a1a2e;margin-bottom:6px;display:flex;align-items:center;justify-content:center;gap:8px}
+.login-sub{font-size:13px;color:#6c757d;margin-bottom:28px}
+.login-input{font-size:15px;padding:10px 14px;border:0.5px solid #ced4da;border-radius:8px;width:100%;text-align:center;letter-spacing:.15em;font-family:inherit;box-sizing:border-box}
+.login-input:focus{outline:none;border-color:#4361ee;box-shadow:0 0 0 2px rgba(67,97,238,.15)}
+.login-error{font-size:12px;color:#e24b4a;margin-top:8px;min-height:18px}
+.login-btn{margin-top:12px;width:100%;padding:10px;background:#1a1a2e;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit}
+.login-btn:hover{background:#333}
+</style>
+</head>
+<body>
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">Influence</div>
+    <div class="login-sub">Accès réservé à l'équipe</div>
+    <input class="login-input" id="pwd-input" type="password" placeholder="Mot de passe"
+      onkeydown="if(event.key==='Enter')checkPwd()"/>
+    <div class="login-error" id="pwd-error"></div>
+    <button class="login-btn" onclick="checkPwd()">Accéder</button>
+  </div>
+</div>
+<div id="main-app" style="display:none">
+
+
+  <span class="nav-title"><i class="ti ti-chart-dots" style="font-size:15px;vertical-align:-2px;margin-right:6px"></i>Influence</span>
+  <button class="nav-btn active" onclick="showPage('batches',this)">Batchs</button>
+  <button class="nav-btn" onclick="showPage('valides',this)">Validés</button>
+  <button class="nav-btn" onclick="showPage('contacts',this)">Contacts</button>
+</div>
+
+<!-- PAGE BATCHS -->
+<div id="page-batches" class="page active">
+  <div class="stats-row">
+    <div class="stat"><div class="stat-val" id="bs-creators">0</div><div class="stat-lbl">Créateurs actifs</div></div>
+    <div class="stat"><div class="stat-val" id="bs-batches">0</div><div class="stat-lbl">Batchs en cours</div></div>
+    <div class="stat"><div class="stat-val" id="bs-vids-total">0</div><div class="stat-lbl">Vidéos commandées</div></div>
+    <div class="stat"><div class="stat-val" style="color:var(--green)" id="bs-vids-val">0</div><div class="stat-lbl">Vidéos validées</div></div>
+    <div class="stat"><div class="stat-val" id="bs-ca">0 €</div><div class="stat-lbl">CA engagé</div></div>
+  </div>
+  <div id="alert-banner" class="alert-banner hidden">
+    <i class="ti ti-alert-triangle" style="color:#a32d2d;font-size:15px;flex-shrink:0;margin-top:1px"></i>
+    <div style="flex:1"><div style="font-size:13px;font-weight:600;color:#791f1f">Actions requises</div><ul id="alert-list" style="list-style:none;margin-top:4px"></ul></div>
+    <span style="cursor:pointer;color:#a32d2d" onclick="document.getElementById('alert-banner').classList.toggle('hidden')"><i class="ti ti-x"></i></span>
+  </div>
+  <div class="toolbar">
+    <button class="filter-btn active" onclick="setFilter('batches','tous',this)">Tous</button>
+    <button class="filter-btn" onclick="setFilter('batches','En cours',this)">En cours</button>
+    <button class="filter-btn" onclick="setFilter('batches','En attente',this)">En attente</button>
+    <button class="filter-btn" onclick="setFilter('batches','FR',this)">France</button>
+    <button class="filter-btn" onclick="setFilter('batches','JP',this)">Japon</button>
+    <input class="search-input ml-auto" type="text" placeholder="Rechercher..." oninput="doSearch('batches',this.value)"/>
+    <button onclick="openModal('creator')">+ Créateur</button>
+  </div>
+  <div class="table-card">
+    <div class="thead" style="grid-template-columns:26px 26px 1fr 48px 54px 86px 68px 72px 44px">
+      <span></span><span></span><span>Créateur</span><span>Pays</span><span>Vidéos</span><span>Avancement</span><span>Prix</span><span>Statut</span><span>Contrat</span>
+    </div>
+    <div id="tbody-batches"></div>
+  </div>
+</div>
+
+<!-- PAGE VALIDÉS -->
+<div id="page-valides" class="page">
+  <div class="bilan-box">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="font-size:13px;font-weight:600">Bilan mensuel</span>
+      <select class="month-select" id="bilan-month" onchange="renderValides()"><option value="">Tous les mois</option></select>
+    </div>
+    <div class="bilan-grid">
+      <div class="bilan-stat"><div class="bilan-val" id="bil-new">0</div><div class="bilan-lbl">Nouveaux créateurs</div></div>
+      <div class="bilan-stat"><div class="bilan-val" id="bil-old">0</div><div class="bilan-lbl">Anciens créateurs</div></div>
+      <div class="bilan-stat"><div class="bilan-val" id="bil-vids">0</div><div class="bilan-lbl">Vidéos validées</div></div>
+      <div class="bilan-stat"><div class="bilan-val" id="bil-ca">0 €</div><div class="bilan-lbl">CA du mois</div></div>
+    </div>
+  </div>
+  <div class="done-divider">
+    <div class="done-divider-line"></div>
+    <div class="done-divider-lbl"><i class="ti ti-circle-check" style="font-size:14px"></i>Batchs validés <span class="done-count" id="done-count">0</span></div>
+    <div class="done-divider-line"></div>
+  </div>
+  <div class="table-card done-card">
+    <div class="thead done-head" style="grid-template-columns:26px 26px 1fr 48px 54px 86px 68px 44px 110px">
+      <span></span><span></span><span>Créateur</span><span>Pays</span><span>Vidéos</span><span>Avancement</span><span>Prix</span><span>Contrat</span><span>Facture</span>
+    </div>
+    <div id="tbody-valides"></div>
+  </div>
+</div>
+
+<!-- PAGE CONTACTS -->
+<div id="page-contacts" class="page">
+  <div class="toolbar">
+    <button class="filter-btn active" onclick="setFilter('contacts','tous',this)">Tous</button>
+    <button class="filter-btn" onclick="setFilter('contacts','repondu',this)">A répondu</button>
+    <button class="filter-btn" onclick="setFilter('contacts','nrepondu',this)">Pas répondu</button>
+    <button class="filter-btn" onclick="setFilter('contacts','FR',this)">France</button>
+    <button class="filter-btn" onclick="setFilter('contacts','JP',this)">Japon</button>
+    <input class="search-input ml-auto" type="text" placeholder="Rechercher..." oninput="doSearch('contacts',this.value)"/>
+    <button onclick="openModal('contact')">+ Contact</button>
+  </div>
+  <div class="table-card">
+    <div class="thead contacts-grid">
+      <span>Créateur</span><span>Pays</span><span>Email</span><span>Contacté le</span><span>Réponse</span>
+    </div>
+    <div id="tbody-contacts"></div>
+  </div>
+</div>
+
+</div>
+
+</div><!-- /main-app -->
+<!-- MODAL -->
+<div id="modal-bg" class="modal-bg" onclick="closeModalBg(event)">
+  <div class="modal">
+    <div class="modal-title"><span id="modal-title-text"></span><span style="cursor:pointer;color:var(--text3)" onclick="closeModal()"><i class="ti ti-x"></i></span></div>
+    <div id="modal-body"></div>
+    <div class="modal-footer" id="modal-footer"></div>
+  </div>
+</div>
+
+<script>
+
+  const PWD = 'influence2025';
+  const SKEY = 'inf_auth_v1';
+  function checkPwd(){
+    const v = document.getElementById('pwd-input').value;
+    if(v === PWD){
+      sessionStorage.setItem(SKEY,'1');
+      document.getElementById('login-screen').classList.add('hidden');
+      document.getElementById('main-app').style.display='block';
+      loadState();
+    } else {
+      const e=document.getElementById('pwd-error');
+      e.textContent='Mot de passe incorrect';
+      document.getElementById('pwd-input').value='';
+      setTimeout(()=>e.textContent='',2500);
+    }
+  }
+  function initAuth(){
+    if(sessionStorage.getItem(SKEY)==='1'){
+      document.getElementById('login-screen').classList.add('hidden');
+      document.getElementById('main-app').style.display='block';
+      loadState();
+    }
+  }
+  initAuth();
+
+
+let state={creators:[],contacts:[]};
+let filters={batches:'tous',contacts:'tous'};
+let searches={batches:'',contacts:''};
+let openIds=new Set();
+let editCtx=null;
+
+function loadState(){
+  try{const d=localStorage.getItem('influence_v1');if(d)state=JSON.parse(d);}catch(e){}
+  fillMonthSelect();renderAll();
+}
+function saveState(){
+  try{localStorage.setItem('influence_v1',JSON.stringify(state));}catch(e){}
+  renderAll();
+}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function g(id){const el=document.getElementById(id);return el?el.value.trim():'';}
+
+function showPage(p,btn){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  btn.classList.add('active');
+}
+function setFilter(page,f,btn){
+  filters[page]=f;
+  btn.closest('.toolbar').querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(page==='batches')renderBatches();else renderContacts();
+}
+function doSearch(page,v){searches[page]=v.toLowerCase();if(page==='batches')renderBatches();else renderContacts();}
+function toggleRow(uid){openIds.has(uid)?openIds.delete(uid):openIds.add(uid);renderAll();}
+function toggleContrat(cid){const c=state.creators.find(x=>x.id===cid);if(c){c.contrat=!c.contrat;saveState();}}
+function toggleFacture(cid,bid){const c=state.creators.find(x=>x.id===cid);if(!c)return;const b=c.batches.find(x=>x.id===bid);if(b){b.factureEnvoyee=!b.factureEnvoyee;saveState();}}
+
+function avColors(pays){
+  if(pays==='JP')return{bg:'#faeeda',color:'#633806'};
+  if(pays==='FR')return{bg:'#e6f1fb',color:'#0c447c'};
+  return{bg:'#f1efe8',color:'#5f5e5a'};
+}
+function paysClass(p){return p==='FR'?'pill-fr':p==='JP'?'pill-jp':'pill-other';}
+function pillStatut(s){const m={'En cours':'pill-encours','Validé':'pill-valide','En attente':'pill-attente','Annulé':'pill-annule'};return`<span class="pill ${m[s]||'pill-attente'}">${s}</span>`;}
+function batchCA(b){return b.videos.reduce((s,v)=>s+(parseFloat(v.prix)||0),0);}
+function batchVal(b){return b.videos.filter(v=>v.statut==='Validée').length;}
+function vsHtml(st){
+  const m={'Validée':{dot:'#1d9e75',cls:'pill-valide'},'En cours':{dot:'#378add',cls:'pill-encours'},'En attente':{dot:'#b4b2a9',cls:'pill-attente'},'Refusée':{dot:'#e24b4a',cls:'pill-annule'}};
+  const v=m[st]||m['En attente'];
+  return`<div class="vstatus"><span class="vstatus-dot" style="background:${v.dot}"></span><span class="pill ${v.cls}" style="font-size:10px">${st}</span></div>`;
+}
+
+function videosHtml(batches,cid){
+  return batches.map(b=>`<div class="batch-section">
+    <div class="batch-label"><i class="ti ti-stack-2" style="font-size:11px"></i>${b.label||'Batch'}<span>· ${b.videos.length} vidéos · ${batchCA(b).toLocaleString('fr-FR')} €</span>
+      <button class="edit-btn" style="margin-left:auto" onclick="event.stopPropagation();openModal('video',{cid:'${cid}',bid:'${b.id}'})">+ Vidéo</button>
+    </div>
+    ${b.videos.map(v=>`<div class="video-row">
+      <span class="infcode">${v.inf||'—'}</span>
+      <span class="vname" title="${v.nom}">${v.nom}</span>
+      <span class="vdate">${v.dateReception||'—'}</span>
+      ${vsHtml(v.statut)}
+    </div>`).join('')}
+    ${!b.videos.length?'<div style="font-size:12px;color:var(--text3);padding:6px 0">Aucune vidéo</div>':''}
+    <div style="height:6px"></div>
+  </div>`).join('');
+}
+
+function renderBatches(){
+  const f=filters.batches,s=searches.batches;
+  const list=state.creators.filter(c=>{
+    const ab=c.batches.filter(b=>b.statut!=='Validé');
+    if(!ab.length)return false;
+    const mf=f==='tous'||f===c.pays||ab.some(b=>b.statut===f);
+    const ms=!s||c.handle.toLowerCase().includes(s)||ab.some(b=>b.videos.some(v=>(v.inf||'').toLowerCase().includes(s)||(v.nom||'').toLowerCase().includes(s)));
+    return mf&&ms;
+  });
+  let tv=0,vv=0,ca=0,bc=0;
+  state.creators.forEach(c=>c.batches.filter(b=>b.statut!=='Validé').forEach(b=>{bc++;tv+=b.videos.length;vv+=batchVal(b);ca+=batchCA(b);}));
+  document.getElementById('bs-creators').textContent=state.creators.filter(c=>c.batches.some(b=>b.statut!=='Validé')).length;
+  document.getElementById('bs-batches').textContent=bc;
+  document.getElementById('bs-vids-total').textContent=tv;
+  document.getElementById('bs-vids-val').textContent=vv;
+  document.getElementById('bs-ca').textContent=ca.toLocaleString('fr-FR')+' €';
+  const alerts=[];
+  state.creators.forEach(c=>{
+    if(!c.contrat)alerts.push(`${c.handle} — contrat manquant`);
+    c.batches.filter(b=>b.statut==='Validé'&&!b.factureEnvoyee).forEach(b=>alerts.push(`${c.handle} (${b.label||'batch'}) — facture à envoyer`));
+  });
+  const banner=document.getElementById('alert-banner');
+  document.getElementById('alert-list').innerHTML=alerts.map(a=>`<li style="font-size:12px;color:#a32d2d;padding:2px 0;display:flex;align-items:center;gap:6px"><span style="width:4px;height:4px;border-radius:50%;background:#e24b4a;display:inline-block;flex-shrink:0"></span>${a}</li>`).join('');
+  banner.classList.toggle('hidden',!alerts.length);
+  const tbody=document.getElementById('tbody-batches');
+  if(!list.length){tbody.innerHTML='<div class="no-results">Aucun créateur actif</div>';return;}
+  tbody.innerHTML=list.map(c=>{
+    const ab=c.batches.filter(b=>b.statut!=='Validé');
+    const tot=ab.reduce((s,b)=>s+b.videos.length,0);
+    const val=ab.reduce((s,b)=>s+batchVal(b),0);
+    const pct=tot?Math.round(val/tot*100):0;
+    const done=pct===100;
+    const ca=ab.reduce((s,b)=>s+batchCA(b),0);
+    const uid=`a-${c.id}`;const isOpen=openIds.has(uid);
+    const{bg,color}=avColors(c.pays);
+    const st=ab.some(b=>b.statut==='En cours')?'En cours':'En attente';
+    return`<div class="creator-row">
+      <div class="crow" style="grid-template-columns:26px 26px 1fr 48px 54px 86px 68px 72px 44px" onclick="toggleRow('${uid}')">
+        <div class="chevron${isOpen?' open':''}"><i class="ti ti-chevron-right"></i></div>
+        <div class="avatar" style="background:${bg};color:${color}">${(c.name||c.handle).split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase()}</div>
+        <div>
+          <div style="font-size:13px;font-weight:500;display:flex;align-items:center;gap:5px">${c.handle}
+            ${!c.contrat?'<i class="ti ti-alert-circle" style="font-size:12px;color:var(--red)" title="Contrat manquant"></i>':''}
+          </div>
+          <div style="font-size:11px;color:var(--text3);display:flex;gap:8px;margin-top:1px">
+            ${c.name||''}
+            ${c.drive?`<a href="${c.drive}" target="_blank" style="display:inline-flex;align-items:center;gap:2px;font-size:11px" onclick="event.stopPropagation()"><i class="ti ti-folder" style="font-size:11px"></i>Drive</a>`:''}
+          </div>
+        </div>
+        <span><span class="pill ${paysClass(c.pays)}">${c.pays||'—'}</span></span>
+        <span>${tot}</span>
+        <div class="pbar-wrap"><div class="pbar"><div class="pbar-fill${done?' full':''}" style="width:${pct}%"></div></div><span class="pbar-txt">${done?'Complet':val+'/'+tot}</span></div>
+        <span style="font-weight:500">${ca.toLocaleString('fr-FR')} €</span>
+        ${pillStatut(st)}
+        <div style="display:flex;justify-content:center" onclick="event.stopPropagation();toggleContrat('${c.id}')"><div class="chk${c.contrat?' ok':' warn'}">${c.contrat?'<i class="ti ti-check"></i>':''}</div></div>
+      </div>
+      <div class="videos-panel${isOpen?' open':''}">
+        <div style="padding:8px 14px 4px 70px;display:flex;gap:8px">
+          <button class="edit-btn" onclick="openModal('batch',{cid:'${c.id}'})">+ Batch</button>
+          <button class="edit-btn" onclick="openModal('editCreator',{cid:'${c.id}'})"><i class="ti ti-edit" style="font-size:11px"></i> Modifier</button>
+        </div>
+        ${videosHtml(ab,c.id)}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function fillMonthSelect(){
+  const sel=document.getElementById('bilan-month');
+  const months=new Set();
+  state.creators.forEach(c=>c.batches.forEach(b=>{if(b.statut==='Validé'&&b.dateValidation){const d=new Date(b.dateValidation);if(!isNaN(d))months.add(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`);}
+  }));
+  const cur=sel.value;
+  sel.innerHTML='<option value="">Tous les mois</option>'+[...months].sort().reverse().map(m=>{const[y,mo]=m.split('-');return`<option value="${m}">${MONTHS[parseInt(mo)-1]} ${y}</option>`;}).join('');
+  sel.value=cur||'';
+}
+
+function renderValides(){
+  fillMonthSelect();
+  const sel=document.getElementById('bilan-month').value;
+  const done=[];
+  state.creators.forEach(c=>c.batches.filter(b=>b.statut==='Validé').forEach(b=>done.push({c,b})));
+  const filtered=sel?done.filter(({b})=>{if(!b.dateValidation)return false;const d=new Date(b.dateValidation);return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`===sel;}):done;
+  const cInMonth=new Set(filtered.map(({c})=>c.id));
+  const firstBatch=new Set();
+  filtered.forEach(({c,b})=>{
+    const allV=c.batches.filter(x=>x.statut==='Validé').sort((a,z)=>new Date(a.dateValidation)-new Date(z.dateValidation));
+    if(allV.length&&allV[0].id===b.id)firstBatch.add(c.id);
+  });
+  document.getElementById('bil-new').textContent=firstBatch.size;
+  document.getElementById('bil-old').textContent=Math.max(0,cInMonth.size-firstBatch.size);
+  document.getElementById('bil-vids').textContent=filtered.reduce((s,{b})=>s+batchVal(b),0);
+  document.getElementById('bil-ca').textContent=filtered.reduce((s,{b})=>s+batchCA(b),0).toLocaleString('fr-FR')+' €';
+  document.getElementById('done-count').textContent=done.length;
+  const tbody=document.getElementById('tbody-valides');
+  if(!done.length){tbody.innerHTML='<div class="no-results">Aucun batch validé</div>';return;}
+  tbody.innerHTML=done.map(({c,b})=>{
+    const uid=`d-${c.id}-${b.id}`;const isOpen=openIds.has(uid);
+    const{bg,color}=avColors(c.pays);const ca=batchCA(b);
+    return`<div class="creator-row">
+      <div class="crow done-bg" style="grid-template-columns:26px 26px 1fr 48px 54px 86px 68px 44px 110px" onclick="toggleRow('${uid}')">
+        <div class="chevron${isOpen?' open':''}"><i class="ti ti-chevron-right"></i></div>
+        <div class="avatar" style="background:${bg};color:${color}">${(c.name||c.handle).split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase()}</div>
+        <div>
+          <div style="font-size:13px;font-weight:500">${c.handle}</div>
+          <div style="font-size:11px;color:var(--text3)">${b.label||'Batch'}</div>
+        </div>
+        <span><span class="pill ${paysClass(c.pays)}">${c.pays||'—'}</span></span>
+        <span>${b.videos.length}</span>
+        <div class="pbar-wrap"><div class="pbar"><div class="pbar-fill full" style="width:100%"></div></div><span class="pbar-txt" style="color:var(--green)">Complet</span></div>
+        <span style="font-weight:500">${ca.toLocaleString('fr-FR')} €</span>
+        <div style="display:flex;justify-content:center" onclick="event.stopPropagation();toggleContrat('${c.id}')"><div class="chk${c.contrat?' ok':' warn'}">${c.contrat?'<i class="ti ti-check"></i>':''}</div></div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:11px;cursor:pointer" onclick="event.stopPropagation();toggleFacture('${c.id}','${b.id}')">
+          <div class="chk${b.factureEnvoyee?' ok':' warn'}">${b.factureEnvoyee?'<i class="ti ti-check"></i>':''}</div>
+          <span style="color:${b.factureEnvoyee?'var(--green-text)':'var(--red-text)'}">${b.factureEnvoyee?'Envoyée':'À envoyer'}</span>
+        </div>
+      </div>
+      <div class="videos-panel${isOpen?' open':''}">
+        ${videosHtml([b],c.id)}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderContacts(){
+  const f=filters.contacts,s=searches.contacts;
+  const list=state.contacts.filter(c=>{
+    const mf=f==='tous'||(f==='repondu'&&c.repondu)||(f==='nrepondu'&&!c.repondu)||f===c.pays;
+    const ms=!s||c.handle.toLowerCase().includes(s)||(c.email||'').toLowerCase().includes(s)||(c.name||'').toLowerCase().includes(s);
+    return mf&&ms;
+  });
+  const tbody=document.getElementById('tbody-contacts');
+  if(!list.length){tbody.innerHTML='<div class="no-results">Aucun contact</div>';return;}
+  tbody.innerHTML=list.map(c=>`<div class="contacts-grid" style="padding:10px 14px;border-bottom:0.5px solid var(--border);align-items:center">
+    <div>
+      <div style="font-size:13px;font-weight:500">${c.handle}</div>
+      <div style="font-size:11px;color:var(--text3)">${c.name||''}</div>
+    </div>
+    <span><span class="pill ${paysClass(c.pays)}">${c.pays||'—'}</span></span>
+    <span style="font-size:12px;color:var(--text2)">${c.email||'—'}</span>
+    <span style="font-size:12px;color:var(--text3)">${c.dateContact||'—'}</span>
+    <div style="display:flex;align-items:center;gap:6px">
+      <span class="pill ${c.repondu?'pill-repond':'pill-nrepond'}">${c.repondu?'A répondu':'Pas répondu'}</span>
+      <button class="edit-btn" onclick="openModal('editContact',{cid:'${c.id}'})"><i class="ti ti-edit" style="font-size:11px"></i></button>
+    </div>
+  </div>`).join('');
+}
+
+function renderAll(){renderBatches();renderValides();renderContacts();}
+
+function openModal(type,ctx){
+  editCtx={type,...(ctx||{})};
+  document.getElementById('modal-title-text').textContent={creator:'Nouveau créateur',editCreator:'Modifier créateur',batch:'Nouveau batch',video:'Nouvelle vidéo',contact:'Nouveau contact',editContact:'Modifier contact'}[type]||'';
+  const body=document.getElementById('modal-body');
+  const footer=document.getElementById('modal-footer');
+  if(type==='creator'||type==='editCreator'){
+    const c=type==='editCreator'?state.creators.find(x=>x.id===ctx.cid):{};
+    body.innerHTML=`<div class="form-grid">
+      <div class="form-row"><label class="form-label">@ Handle *</label><input id="f-handle" type="text" placeholder="@creator" value="${c.handle||''}"/></div>
+      <div class="form-row"><label class="form-label">Nom</label><input id="f-name" type="text" value="${c.name||''}"/></div>
+    </div><div class="form-grid">
+      <div class="form-row"><label class="form-label">Pays</label><select id="f-pays"><option value="FR"${c.pays==='FR'?' selected':''}>France</option><option value="JP"${c.pays==='JP'?' selected':''}>Japon</option><option value="Autre"${(!c.pays||c.pays==='Autre')?' selected':''}>Autre</option></select></div>
+      <div class="form-row"><label class="form-label">Lien profil</label><input id="f-profil" type="text" placeholder="https://..." value="${c.profil||''}"/></div>
+    </div>
+    <div class="form-row"><label class="form-label">Lien Drive</label><input id="f-drive" type="text" placeholder="https://drive.google.com/..." value="${c.drive||''}"/></div>`;
+    footer.innerHTML=`${type==='editCreator'?`<button class="btn-danger" onclick="deleteCreator('${c.id}')">Supprimer</button>`:''}
+      <button onclick="closeModal()">Annuler</button>
+      <button class="btn-primary" onclick="saveCreator(${type==='editCreator'})">${type==='editCreator'?'Enregistrer':'Ajouter'}</button>`;
+  }else if(type==='batch'){
+    body.innerHTML=`<div class="form-row"><label class="form-label">Nom du batch</label><input id="f-blabel" type="text" placeholder="ex: Batch 1 — Juin 2025"/></div>
+    <div class="form-grid">
+      <div class="form-row"><label class="form-label">Statut</label><select id="f-bstatut"><option>En attente</option><option>En cours</option></select></div>
+      <div class="form-row"><label class="form-label">Prix par vidéo (€)</label><input id="f-bprix" type="number" placeholder="150"/></div>
+    </div>`;
+    footer.innerHTML=`<button onclick="closeModal()">Annuler</button><button class="btn-primary" onclick="saveBatch()">Ajouter</button>`;
+  }else if(type==='video'){
+    const b=state.creators.find(x=>x.id===ctx.cid)?.batches.find(x=>x.id===ctx.bid);
+    body.innerHTML=`<div class="form-row"><label class="form-label">INFcode *</label><input id="f-vinf" type="text" placeholder="INF0001"/></div>
+    <div class="form-row"><label class="form-label">Nom de la vidéo *</label><input id="f-vnom" type="text"/></div>
+    <div class="form-grid">
+      <div class="form-row"><label class="form-label">Statut</label><select id="f-vstatut"><option>En attente</option><option>En cours</option><option>Validée</option><option>Refusée</option></select></div>
+      <div class="form-row"><label class="form-label">Date réception</label><input id="f-vdate" type="date"/></div>
+    </div>
+    <div class="form-row"><label class="form-label">Prix (€) — vide = prix du batch (${b?.prix||0} €)</label><input id="f-vprix" type="number"/></div>`;
+    footer.innerHTML=`<button onclick="closeModal()">Annuler</button><button class="btn-primary" onclick="saveVideo()">Ajouter</button>`;
+  }else if(type==='contact'||type==='editContact'){
+    const c=type==='editContact'?state.contacts.find(x=>x.id===ctx.cid):{};
+    body.innerHTML=`<div class="form-grid">
+      <div class="form-row"><label class="form-label">@ Handle *</label><input id="f-chandle" type="text" placeholder="@creator" value="${c.handle||''}"/></div>
+      <div class="form-row"><label class="form-label">Nom</label><input id="f-cname" type="text" value="${c.name||''}"/></div>
+    </div><div class="form-grid">
+      <div class="form-row"><label class="form-label">Pays</label><select id="f-cpays"><option value="FR"${c.pays==='FR'?' selected':''}>France</option><option value="JP"${c.pays==='JP'?' selected':''}>Japon</option><option value="Autre"${(!c.pays||c.pays==='Autre')?' selected':''}>Autre</option></select></div>
+      <div class="form-row"><label class="form-label">Email</label><input id="f-cemail" type="email" value="${c.email||''}"/></div>
+    </div><div class="form-grid">
+      <div class="form-row"><label class="form-label">Date de contact</label><input id="f-cdate" type="date" value="${c.dateContact||''}"/></div>
+      <div class="form-row"><label class="form-label">A répondu ?</label><select id="f-crepondu"><option value="0"${!c.repondu?' selected':''}>Pas répondu</option><option value="1"${c.repondu?' selected':''}>A répondu</option></select></div>
+    </div>`;
+    footer.innerHTML=`${type==='editContact'?`<button class="btn-danger" onclick="deleteContact('${c.id}')">Supprimer</button>`:''}
+      <button onclick="closeModal()">Annuler</button>
+      <button class="btn-primary" onclick="saveContact(${type==='editContact'})">${type==='editContact'?'Enregistrer':'Ajouter'}</button>`;
+  }
+  document.getElementById('modal-bg').classList.add('open');
+}
+
+function closeModal(){document.getElementById('modal-bg').classList.remove('open');editCtx=null;}
+function closeModalBg(e){if(e.target===document.getElementById('modal-bg'))closeModal();}
+
+function saveCreator(isEdit){
+  const handle=g('f-handle');if(!handle)return;
+  if(isEdit){const c=state.creators.find(x=>x.id===editCtx.cid);if(c){c.handle=handle;c.name=g('f-name');c.pays=g('f-pays');c.profil=g('f-profil');c.drive=g('f-drive');}}
+  else{state.creators.push({id:uid(),handle,name:g('f-name'),pays:g('f-pays'),profil:g('f-profil'),drive:g('f-drive'),contrat:false,batches:[]});}
+  closeModal();saveState();
+}
+function deleteCreator(cid){state.creators=state.creators.filter(x=>x.id!==cid);closeModal();saveState();}
+
+function saveBatch(){
+  const c=state.creators.find(x=>x.id===editCtx.cid);if(!c)return;
+  c.batches.push({id:uid(),label:g('f-blabel'),statut:g('f-bstatut'),prix:parseFloat(g('f-bprix'))||0,factureEnvoyee:false,videos:[]});
+  closeModal();saveState();
+}
+
+function saveVideo(){
+  const nom=g('f-vnom');if(!nom)return;
+  const c=state.creators.find(x=>x.id===editCtx.cid);if(!c)return;
+  const b=c.batches.find(x=>x.id===editCtx.bid);if(!b)return;
+  const prix=parseFloat(g('f-vprix'))||b.prix||0;
+  b.videos.push({id:uid(),inf:g('f-vinf'),nom,statut:g('f-vstatut'),dateReception:g('f-vdate')||'',prix});
+  if(b.videos.length&&b.videos.every(v=>v.statut==='Validée')&&b.statut!=='Validé'){b.statut='Validé';b.dateValidation=new Date().toISOString().slice(0,10);}
+  closeModal();saveState();
+}
+
+function saveContact(isEdit){
+  const handle=g('f-chandle');if(!handle)return;
+  if(isEdit){const c=state.contacts.find(x=>x.id===editCtx.cid);if(c){c.handle=handle;c.name=g('f-cname');c.pays=g('f-cpays');c.email=g('f-cemail');c.dateContact=g('f-cdate');c.repondu=g('f-crepondu')==='1';}}
+  else{state.contacts.push({id:uid(),handle,name:g('f-cname'),pays:g('f-cpays'),email:g('f-cemail'),dateContact:g('f-cdate'),repondu:g('f-crepondu')==='1'});}
+  closeModal();saveState();
+}
+function deleteContact(cid){state.contacts=state.contacts.filter(x=>x.id!==cid);closeModal();saveState();}
+
+</script>
+</body>
+</html>
