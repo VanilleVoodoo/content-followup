@@ -242,7 +242,7 @@ button:active{transform:scale(.98)}
 
   const PWD = 'influence2025';
   const SKEY = 'inf_auth_v1';
-  function checkPwd(){
+  window.checkPwd = function(){
     const v = document.getElementById('pwd-input').value;
     if(v === PWD){
       sessionStorage.setItem(SKEY,'1');
@@ -256,7 +256,7 @@ button:active{transform:scale(.98)}
       setTimeout(()=>e.textContent='',2500);
     }
   }
-  function initAuth(){
+window.initAuth = function(){
     if(sessionStorage.getItem(SKEY)==='1'){
       document.getElementById('login-screen').classList.add('hidden');
       document.getElementById('main-app').style.display='block';
