@@ -481,6 +481,7 @@ function renderContacts(){
 
 function renderAll(){renderBatches();renderValides();renderContacts();}
 
+window.openModal = function(type,ctx){
 function openModal(type,ctx){
   editCtx={type,...(ctx||{})};
   document.getElementById('modal-title-text').textContent={creator:'Nouveau créateur',editCreator:'Modifier créateur',batch:'Nouveau batch',video:'Nouvelle vidéo',contact:'Nouveau contact',editContact:'Modifier contact'}[type]||'';
@@ -533,10 +534,10 @@ function openModal(type,ctx){
       <button class="btn-primary" onclick="saveContact(${type==='editContact'})">${type==='editContact'?'Enregistrer':'Ajouter'}</button>`;
   }
   document.getElementById('modal-bg').classList.add('open');
-}
+};
 
-function closeModal(){document.getElementById('modal-bg').classList.remove('open');editCtx=null;}
-function closeModalBg(e){if(e.target===document.getElementById('modal-bg'))closeModal();}
+window.closeModal = function(){document.getElementById('modal-bg').classList.remove('open');editCtx=null;}
+window.closeModalBg = function(e){if(e.target===document.getElementById('modal-bg'))closeModal();}
 
 function saveCreator(isEdit){
   const handle=g('f-handle');if(!handle)return;
