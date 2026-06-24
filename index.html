@@ -257,11 +257,10 @@ function checkPwd(){
     }
   }
 function initAuth(){
-    if(sessionStorage.getItem(SKEY)==='1'){
-      document.getElementById('login-screen').classList.add('hidden');
-      document.getElementById('main-app').style.display='block';
-      loadState();
-    }
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('main-app').style.display='block';
+  loadState();
+}
   }
   initAuth();
 
