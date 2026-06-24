@@ -486,26 +486,41 @@ function openModal(type,ctx){
   document.getElementById('modal-title-text').textContent={creator:'Nouveau créateur',editCreator:'Modifier créateur',batch:'Nouveau batch',video:'Nouvelle vidéo',contact:'Nouveau contact',editContact:'Modifier contact'}[type]||'';
   const body=document.getElementById('modal-body');
   const footer=document.getElementById('modal-footer');
-  if(type==='creator'||type==='editCreator'){
-    const c=type==='editCreator'?state.creators.find(x=>x.id===ctx.cid):{};
-    body.innerHTML=`<div class="form-grid">
-      <div class="form-row"><label class="form-label">@ Handle *</label><input id="f-handle" type="text" placeholder="@creator" value="${c.handle||''}"/></div>
-      <div class="form-row"><label class="form-label">Nom</label><input id="f-name" type="text" value="${c.name||''}"/></div>
-    </div><div class="form-grid">
-      <div class="form-row"><label class="form-label">Pays</label><select id="f-pays"><option value="FR"${c.pays==='FR'?' selected':''}>France</option><option value="JP"${c.pays==='JP'?' selected':''}>Japon</option><option value="Autre"${(!c.pays||c.pays==='Autre')?' selected':''}>Autre</option></select></div>
-      <div class="form-row"><label class="form-label">Lien profil</label><input id="f-profil" type="text" placeholder="https://..." value="${c.profil||''}"/></div>
-    </div>
-    <div class="form-row"><label class="form-label">Lien Drive</label><input id="f-drive" type="text" placeholder="https://drive.google.com/..." value="${c.drive||''}"/></div>`;
-    footer.innerHTML=`${type==='editCreator'?`<button class="btn-danger" onclick="deleteCreator('${c.id}')">Supprimer</button>`:''}
-      <button onclick="closeModal()">Annuler</button>
-      <button class="btn-primary" onclick="saveCreator(${type==='editCreator'})">${type==='editCreator'?'Enregistrer':'Ajouter'}</button>`;
-  }else if(type==='batch'){
-    body.innerHTML=`<div class="form-row"><label class="form-label">Nom du batch</label><input id="f-blabel" type="text" placeholder="ex: Batch 1 — Juin 2025"/></div>
-    <div class="form-grid">
-      <div class="form-row"><label class="form-label">Statut</label><select id="f-bstatut"><option>En attente</option><option>En cours</option></select></div>
-      <div class="form-row"><label class="form-label">Prix par vidéo (€)</label><input id="f-bprix" type="number" placeholder="150"/></div>
-    </div>`;
-    footer.innerHTML=`<button onclick="closeModal()">Annuler</button><button class="btn-primary" onclick="saveBatch()">Ajouter</button>`;
+  if(type==='creator'){
+  const c={};
+  body.innerHTML=`<div class="form-grid">
+    <div class="form-row"><label class="form-label">@ Handle *</label><input id="f-handle" type="text" placeholder="@creator" value=""/></div>
+    <div class="form-row"><label class="form-label">Nom</label><input id="f-name" type="text" value=""/></div>
+  </div><div class="form-grid">
+    <div class="form-row"><label class="form-label">Pays</label><select id="f-pays"><option value="FR">France</option><option value="JP">Japon</option><option value="Autre">Autre</option></select></div>
+    <div class="form-row"><label class="form-label">Lien profil</label><input id="f-profil" type="text" placeholder="https://..." value=""/></div>
+  </div>
+  <div class="form-row"><label class="form-label">Lien Drive</label><input id="f-drive" type="text" placeholder="https://drive.google.com/..." value=""/></div>
+  <div style="margin:14px 0 10px;font-size:12px;font-weight:600;color:var(--text2);border-top:0.5px solid var(--border);padding-top:14px">Premier batch</div>
+  <div class="form-grid">
+    <div class="form-row"><label class="form-label">Nom du batch</label><input id="f-blabel" type="text" placeholder="Batch 1 — Juin 2025"/></div>
+    <div class="form-row"><label class="form-label">Nb de vidéos</label><input id="f-bnbvids" type="number" placeholder="5"/></div>
+  </div>
+  <div class="form-grid">
+    <div class="form-row"><label class="form-label">Prix par vidéo (€)</label><input id="f-bprix" type="number" placeholder="150"/></div>
+    <div class="form-row"><label class="form-label">Statut</label><select id="f-bstatut"><option>En attente</option><option>En cours</option></select></div>
+  </div>`;
+  footer.innerHTML=`<button onclick="closeModal()">Annuler</button>
+    <button class="btn-primary" onclick="saveCreator(false)">Ajouter</button>`;
+}else if(type==='editCreator'){
+  const c=state.creators.find(x=>x.id===ctx.cid);
+  body.innerHTML=`<div class="form-grid">
+    <div class="form-row"><label class="form-label">@ Handle</label><input id="f-handle" type="text" value="${c.handle||''}"/></div>
+    <div class="form-row"><label class="form-label">Nom</label><input id="f-name" type="text" value="${c.name||''}"/></div>
+  </div><div class="form-grid">
+    <div class="form-row"><label class="form-label">Pays</label><select id="f-pays"><option value="FR"${c.pays==='FR'?' selected':''}>France</option><option value="JP"${c.pays==='JP'?' selected':''}>Japon</option><option value="Autre"${(!c.pays||c.pays==='Autre')?' selected':''}>Autre</option></select></div>
+    <div class="form-row"><label class="form-label">Lien profil</label><input id="f-profil" type="text" placeholder="https://..." value="${c.profil||''}"/></div>
+  </div>
+  <div class="form-row"><label class="form-label">Lien Drive</label><input id="f-drive" type="text" placeholder="https://drive.google.com/..." value="${c.drive||''}"/></div>`;
+  footer.innerHTML=`<button class="btn-danger" onclick="deleteCreator('${c.id}')">Supprimer</button>
+    <button onclick="closeModal()">Annuler</button>
+    <button class="btn-primary" onclick="saveCreator(true)">Enregistrer</button>`;
+}
   }else if(type==='video'){
     const b=state.creators.find(x=>x.id===ctx.cid)?.batches.find(x=>x.id===ctx.bid);
     body.innerHTML=`<div class="form-row"><label class="form-label">INFcode *</label><input id="f-vinf" type="text" placeholder="INF0001"/></div>
