@@ -130,17 +130,8 @@ button:active{transform:scale(.98)}
 </style>
 </head>
 <body>
-<div id="login-screen">
-  <div class="login-box">
-    <div class="login-logo">Influence</div>
-    <div class="login-sub">Accès réservé à l'équipe</div>
-    <input class="login-input" id="pwd-input" type="password" placeholder="Mot de passe"
-      onkeydown="if(event.key==='Enter')checkPwd()"/>
-    <div class="login-error" id="pwd-error"></div>
-    <button class="login-btn" onclick="checkPwd()">Accéder</button>
-  </div>
-</div>
-<div id="main-app" style="display:none">
+
+<div id="main-app">
 
 
   <span class="nav-title"><i class="ti ti-chart-dots" style="font-size:15px;vertical-align:-2px;margin-right:6px"></i>Influence</span>
@@ -239,29 +230,6 @@ button:active{transform:scale(.98)}
 </div>
 
 <script>
-
-  const PWD = 'influence2025';
-  const SKEY = 'inf_auth_v1';
-function checkPwd(){
-    const v = document.getElementById('pwd-input').value;
-    if(v === PWD){
-      sessionStorage.setItem(SKEY,'1');
-      document.getElementById('login-screen').classList.add('hidden');
-      document.getElementById('main-app').style.display='block';
-      loadState();
-    } else {
-      const e=document.getElementById('pwd-error');
-      e.textContent='Mot de passe incorrect';
-      document.getElementById('pwd-input').value='';
-      setTimeout(()=>e.textContent='',2500);
-    }
-  }
-function initAuth(){
-  document.getElementById('login-screen').classList.add('hidden');
-  document.getElementById('main-app').style.display='block';
-  loadState();
-}
-initAuth();
 
 
 let state={creators:[],contacts:[]};
@@ -583,6 +551,7 @@ function saveContact(isEdit){
 }
 function deleteContact(cid){state.contacts=state.contacts.filter(x=>x.id!==cid);closeModal();saveState();}
 
+loadState()
 </script>
 </body>
 </html>
